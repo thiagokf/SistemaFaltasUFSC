@@ -1,4 +1,5 @@
 # SistemaFaltasUFSC
 
 Trabalho de Introdução a Programação Orientada a Objetos
-grupo: Thiago Fusco, Vinicius e Vincenzzo
+
+Grupo: Thiago Fusco, Vinicius Anverze e Vincenzzo machado
