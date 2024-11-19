@@ -265,7 +265,7 @@ while True:
                 print(f'{porcentagemMaximaPossivel:.2f}%')
             
             else:
-                print('Você deve digitar ')
+                print('ERRO: Você deve digitar 1 ou 2')
    
             
         if (opcao == 6):
