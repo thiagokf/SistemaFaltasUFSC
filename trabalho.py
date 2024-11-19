@@ -287,7 +287,7 @@ while True:
                 print(numeroAulasFaltaveis)
             
             else:
-                print('AAAAAAAAAAAAAAAAAAAAA')
+                print('ERRO: Você deve digitar 1 ou 2')
             
         
         if (opcao == 7):
