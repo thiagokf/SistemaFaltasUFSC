@@ -6,12 +6,16 @@ class Disciplina:
         self.alunos = []  # lista de alunos matriculados
 
     def adicionar_aluno(self, aluno):
-        if aluno not in self.alunos:
-            self.alunos.append(aluno)
-            aluno.adicionar_disciplina(self)
-        else:
-            print(f"O aluno {aluno.nome} já está matriculado na disciplina {self.nome}.")
-
+        for a in self.alunos:
+            if a.matricula == aluno.matricula:
+                print("Já existe um aluno com essa matrícula")
+                return
+            if a.cpf == aluno.cpf:
+                print(f"Aluno de cpf {aluno.cpf} já cadastrado")
+                return
+        self.alunos.append(aluno)
+        aluno.adicionar_disciplina(self)
+        print(f"Aluno {aluno.nome} adicionado à disciplina {self.nome}.")
     def listar_alunos(self):
         if not self.alunos:
             return f"Não há alunos matriculados na disciplina {self.nome}."
