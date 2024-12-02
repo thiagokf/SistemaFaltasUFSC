@@ -1,9 +1,8 @@
-class Disciplina:
-    def __init__(self, nome, creditos, total_aulas):
+vclass Disciplina:
+    def _init_(self, nome, total_aulas):
         self.nome = nome
-        self.creditos = creditos
         self.total_aulas = total_aulas
-        self.alunos = []  # lista de alunos matriculados
+        self.alunos = []  # Agregação: cada Disciplina mantém uma lista de alunos matriculados
 
     def adicionar_aluno(self, aluno):
         for a in self.alunos:
@@ -16,6 +15,7 @@ class Disciplina:
         self.alunos.append(aluno)
         aluno.adicionar_disciplina(self)
         print(f"Aluno {aluno.nome} adicionado à disciplina {self.nome}.")
+
     def listar_alunos(self):
         if not self.alunos:
             return f"Não há alunos matriculados na disciplina {self.nome}."
@@ -42,22 +42,20 @@ class Disciplina:
         print("Aluno não encontrado.")
         return None
 
-    def __str__(self):
-        return f"{self.nome} ({self.creditos} créditos, {self.total_aulas} aulas no total)"
-
-
+    def _str_(self):
+        return f"{self.nome}, {self.total_aulas} aulas no total)"
+    
 class Pessoa:
-    def __init__(self, nome, cpf):
+    def _init_(self, nome, cpf):
         self.nome = nome
         self.cpf = cpf
     
-    def __str__(self):
+    def _str_(self):
         return f"{self.nome} - ({self.cpf})"
 
-
-class Aluno(Pessoa):
-    def __init__(self, nome, cpf, matricula):
-        super().__init__(nome, cpf)
+class Aluno(Pessoa): #herança
+    def _init_(self, nome, cpf, matricula):
+        super()._init_(nome, cpf)
         self.matricula = matricula
         self.faltas = {}
         self.disciplinas = []
@@ -79,16 +77,15 @@ class Aluno(Pessoa):
         else:
             print(f"O aluno não está matriculado na disciplina {disciplina_nome}.")
 
-    def __str__(self):
-        return f"{self.nome} - ({self.matricula})"
-
-
+    def _str_(self):
+        return f"{self.nome} - ({self.matricula})" #polimorfismo com o método _str_ da classe filho
+    
 class SistemaAcademico:
-    def __init__(self):
+    def _init_(self):
         self.disciplinas = []
 
-    def criar_disciplina(self, nome, creditos, total_aulas):
-        disciplina = Disciplina(nome, creditos, total_aulas)
+    def criar_disciplina(self, nome, total_aulas):
+        disciplina = Disciplina(nome, total_aulas)
         self.disciplinas.append(disciplina)
         print(f"Disciplina {nome} criada com sucesso.")
 
@@ -146,8 +143,6 @@ class SistemaAcademico:
         print("Aluno não encontrado.")
         return None
 
-
-# Programa principal
 sistema = SistemaAcademico()
 
 while True:
@@ -165,9 +160,8 @@ while True:
         
         if opcao == 1:
             nome = input("Nome da disciplina: ")
-            creditos = int(input("Quantidade de créditos: "))
             total_aulas = int(input("Quantidade total de aulas: "))
-            sistema.criar_disciplina(nome, creditos, total_aulas)
+            sistema.criar_disciplina(nome, total_aulas)
         
         elif opcao == 2:
             sistema.listar_disciplinas()
