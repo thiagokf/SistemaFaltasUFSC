@@ -1,174 +1,253 @@
-#quantas aulas pode matar de poo
+class Disciplina:
+    def __init__(self, nome, creditos, total_aulas):
+        self.nome = nome
+        self.creditos = creditos
+        self.total_aulas = total_aulas
+        self.alunos = []  # lista de alunos matriculados
 
-class SistemaGeralUFSC:
-    def __init__(self):
-        self.alunos = []
-        
-    def acharMatricula(self, matricula):
-        achou = False
-        
-        for aluno in self.alunos:
-            if (aluno['matricula'] == matricula):
-                return aluno
-        
-        if (achou == False):
-            print(f'Nenhum aluno foi encontrado com a matrícula {matricula}\n')
-            return None
-        
-    def adicionarAluno(self, matricula, nome, numeroFaltasPOO, numeroFaltasFMI):
-        if (self.acharMatricula(matricula) != None):
-            print('Já existe um aluno com essa matrícula. Cada aluno deve ter uma matrícula única.')
-            return
-        
-        self.alunos.append({'nome': nome, 'matricula': matricula, 'numeroFaltasPOO': int(numeroFaltasPOO), 'numeroFaltasFMI': int(numeroFaltasFMI)})
-    
-    def atualizarFichaAluno(self, matricula):
-        aluno = self.acharMatricula(matricula)
-        if (aluno == None):
-            return
+    def adicionar_aluno(self, aluno):
+        if aluno not in self.alunos:
+            self.alunos.append(aluno)
+            aluno.adicionar_disciplina(self)
         else:
-            nome = input('Digite o nome do aluno: ')
-            matricula = input('Digite a matricula do aluno: ')
-            numeroFaltasPOO = int(input(f'Digite o número de faltas do aluno em POO até hoje: '))
-            numeroFaltasFMI = int(input(f'Digite o número de faltas do aluno em FMI até hoje: '))
-            
-            aluno['nome'] = nome
-            aluno['matricula'] = matricula
-            aluno['numeroFaltasPOO'] = int(numeroFaltasPOO)
-            aluno['numeroFaltasFMI'] = int(numeroFaltasFMI)
-            achou = True
-            
-            print(f'A ficha de {nome} foi atualizada!')
-        
-    def deletarFichaAluno(self, matricula):
-        aluno = self.acharMatricula(matricula)
-        if (aluno == None):
-            print(f'Nenhum aluno foi encontrado com a matrícula {matricula}\n')
-            return
-        
-        index = self.alunos.index(aluno)
-        self.alunos.pop(index)
+            print(f"O aluno {aluno.nome} já está matriculado na disciplina {self.nome}.")
 
-        print(f'Aluno de matrícula {matricula} foi deletado')
+    def listar_alunos(self):
+        if not self.alunos:
+            return f"Não há alunos matriculados na disciplina {self.nome}."
+        return [f"{aluno.nome} ({aluno.matricula})" for aluno in self.alunos]
+
+    def remover_aluno(self, matricula):
+        aluno_encontrado = None
+        for aluno in self.alunos:
+            if aluno.matricula == matricula:
+                aluno_encontrado = aluno
+                break
+        
+        if aluno_encontrado:
+            self.alunos.remove(aluno_encontrado)
+            aluno_encontrado.remover_disciplina(self)
+            print(f"Aluno {aluno_encontrado.nome} removido da disciplina {self.nome}.")
+        else:
+            print(f"Nenhum aluno com matrícula {matricula} encontrado na disciplina {self.nome}.")
+
+    def faltas_aluno(self, matricula):
+        for aluno in self.alunos:
+            if aluno.matricula == matricula:
+                return aluno.faltas.get(self.nome, 0)
+        print("Aluno não encontrado.")
+        return None
+
+    def __str__(self):
+        return f"{self.nome} ({self.creditos} créditos, {self.total_aulas} aulas no total)"
+
+
+class Pessoa:
+    def __init__(self, nome, cpf):
+        self.nome = nome
+        self.cpf = cpf
     
-    def numeroAulasFaltaveis(self, numeroDeFaltas):
-        aulasFaltaveis = (self.creditosTotais * 0.25) - numeroDeFaltas
-        
-        if (aulasFaltaveis < 0):
-            return 'Aluno já foi reprovado por frequência insuficiente'
-        
-        return f'{aulasFaltaveis} dias'
+    def __str__(self):
+        return f"{self.nome} - ({self.cpf})"
 
 
-class SistemaPOO(SistemaGeralUFSC):
+class Aluno(Pessoa):
+    def __init__(self, nome, cpf, matricula):
+        super().__init__(nome, cpf)
+        self.matricula = matricula
+        self.faltas = {}
+        self.disciplinas = []
+
+    def adicionar_disciplina(self, disciplina):
+        if disciplina not in self.disciplinas:
+            self.disciplinas.append(disciplina)
+            self.faltas[disciplina.nome] = 0
+
+    def remover_disciplina(self, disciplina):
+        if disciplina in self.disciplinas:
+            self.disciplinas.remove(disciplina)
+            if disciplina.nome in self.faltas:
+                del self.faltas[disciplina.nome]
+
+    def registrar_faltas(self, disciplina_nome, quantidade):
+        if disciplina_nome in self.faltas:
+            self.faltas[disciplina_nome] += quantidade
+        else:
+            print(f"O aluno não está matriculado na disciplina {disciplina_nome}.")
+
+    def __str__(self):
+        return f"{self.nome} - ({self.matricula})"
+
+
+class SistemaAcademico:
     def __init__(self):
-        super().__init__()
-        self.creditosTotais = 102
-    def numeroAulasFaltaveis(self, numeroFaltasPOO):
-        numeroFaltasPOO = aluno['numeroFaltasPOO']
-        aulasFaltaveis = (self.creditosTotais * 0.25) - int(numeroFaltasPOO)
-        
-        if (aulasFaltaveis < 0):
-            return 'Aluno já foi reprovado por frequência insuficiente'
-        
-        return f'{aulasFaltaveis} dias'    
-    def porcentagemMaximaPossivel(self, numeroFaltasPOO):
-        numeroFaltasPOO = aluno['numeroFaltasPOO']
-        return (self.creditosTotais - int(numeroFaltasPOO)) / self.creditosTotais
-    
-class SistemaFMI(SistemaGeralUFSC):
-    def __init__(self):
-        super().__init__()
-        self.creditosTotais = 72
-        
-    def numeroAulasFaltaveis(self, numeroFaltasFMI):
-        numeroFaltasFMI = aluno['numeroFaltasFMI']
-        aulasFaltaveis = self.creditosTotais - int(numeroFaltasFMI)
-        
-        return f'Você pode faltar {aulasFaltaveis} dias (todas as aulas), desde que sua média final não seja menor que 6, caso passar direto, ou menor do que 3, em caso de recuperação'
-        
-    def porcentagemMaximaPossivel(self, numeroFaltasFMI):
-        numeroFaltasFMI = aluno['numeroFaltasFMI']
-        return (self.creditosTotais - int(numeroFaltasFMI)) / self.creditosTotais
-    
+        self.disciplinas = []
 
-SistemaGeralUFSC = SistemaGeralUFSC()
-SistemaPOO = SistemaPOO()
-SistemaFMI = SistemaFMI()
+    def criar_disciplina(self, nome, creditos, total_aulas):
+        disciplina = Disciplina(nome, creditos, total_aulas)
+        self.disciplinas.append(disciplina)
+        print(f"Disciplina {nome} criada com sucesso.")
+
+    def listar_disciplinas(self):
+        if not self.disciplinas:
+            print("Nenhuma disciplina cadastrada.")
+        else:
+            for i, disc in enumerate(self.disciplinas, 1):
+                print(f"{i}. {disc}")
+
+    def buscar_disciplina(self, nome):
+        for disciplina in self.disciplinas:
+            if disciplina.nome == nome:
+                return disciplina
+        return None
+
+    def excluir_disciplina(self, nome):
+        disciplina_encontrada = None
+        for disciplina in self.disciplinas:
+            if disciplina.nome == nome:
+                disciplina_encontrada = disciplina
+                break
+        
+        if disciplina_encontrada:
+            self.disciplinas.remove(disciplina_encontrada)
+            print(f"Disciplina {disciplina_encontrada.nome} excluída com sucesso.")
+        else:
+            print(f"Disciplina {nome} não encontrada.")
+
+    def alterar_nome_disciplina(self, nome_atual, novo_nome):
+        disciplina = self.buscar_disciplina(nome_atual)
+        if disciplina:
+            disciplina.nome = novo_nome
+            print(f"Nome da disciplina alterado para {novo_nome}.")
+        else:
+            print(f"Disciplina {nome_atual} não encontrada.")
+
+    def porcentagem_presenca(self, disciplina, matricula):
+        for aluno in disciplina.alunos:
+            if aluno.matricula == matricula:
+                faltas = disciplina.faltas_aluno(matricula)
+                if faltas is not None:
+                    return ((disciplina.total_aulas - faltas) / disciplina.total_aulas) * 100
+        print("Aluno não encontrado.")
+        return None
+
+    def aulas_restantes(self, disciplina, matricula):
+        for aluno in disciplina.alunos:
+            if aluno.matricula == matricula:
+                faltas = disciplina.faltas_aluno(matricula)
+                if faltas is not None:
+                    limite_faltas = disciplina.total_aulas * 0.25
+                    restante = limite_faltas - faltas
+                    return max(0, restante)
+        print("Aluno não encontrado.")
+        return None
+
+
+# Programa principal
+sistema = SistemaAcademico()
 
 while True:
+    print("\n---- SISTEMA UFSC ----")
+    print("--- Menu Principal ---")
+    print("1. Criar disciplina")
+    print("2. Listar disciplinas")
+    print("3. Gerenciar disciplina")
+    print("4. Excluir disciplina")
+    print("5. Alterar nome da disciplina")
+    print("6. Sair")
+    
     try:
-        opcao = int(input('1 - adicionar aluno \n2 - buscar aluno \n3 - atualizar ficha do aluno \n4 - deletar ficha de aluno \n5 - Verificar porcentagem máxima possível \n6 - Verificar quantos dias o aluno ainda pode faltar para não reprovar \n7 - sair do programa \n'))
+        opcao = int(input("Escolha uma opção: "))
         
-        if (opcao == 1):
-            nome = input('Digite o nome do aluno: ')
-            matricula = input('Digite a matricula do aluno: ')
-            numeroFaltasPOO = input('Digite o número de faltas do aluno em POO: ')
-            numeroFaltasFMI = input('Digite o número de faltas do aluno em FMI: ')
-            
-            SistemaGeralUFSC.adicionarAluno(matricula, nome, numeroFaltasFMI, numeroFaltasPOO)
-            
-        if (opcao == 2):
-            matricula = input('Digite a matrícula do aluno que você quer buscar: \n')
-            
-            print(SistemaGeralUFSC.acharMatricula(matricula))
+        if opcao == 1:
+            nome = input("Nome da disciplina: ")
+            creditos = int(input("Quantidade de créditos: "))
+            total_aulas = int(input("Quantidade total de aulas: "))
+            sistema.criar_disciplina(nome, creditos, total_aulas)
         
-        if (opcao == 3):
-            matricula = input('Digite a matrícula do aluno que você quer atualizar a ficha: \n')
-            
-            SistemaGeralUFSC.atualizarFichaAluno(matricula)
-                
-        if (opcao == 4):
-            matricula = input('Digite a matrícula do aluno que você quer deletar: \n')
-            
-            SistemaGeralUFSC.deletarFichaAluno(matricula)
+        elif opcao == 2:
+            sistema.listar_disciplinas()
         
-        if (opcao == 5):
-            opcaoMateria = input('Digite 1 para verificar POO e 2 para verificar FMI: \n')
-            
-            matricula = input('Digite a matrícula do aluno que você quer verificar: \n')
-                
-            aluno = SistemaGeralUFSC.acharMatricula(matricula)
-            
-            if (aluno == None):
-                print (f'Nenhum aluno foi encontrado com a matrícula {matricula}\n')
-            
-            elif (opcaoMateria == '1'):
-                porcentagemMaximaPossivel = SistemaPOO.porcentagemMaximaPossivel(numeroFaltasPOO)*100
-                print(f'{porcentagemMaximaPossivel:.2f}%')
-            
-            elif (opcaoMateria == '2'):
-                porcentagemMaximaPossivel = SistemaFMI.porcentagemMaximaPossivel(numeroFaltasFMI)*100
-                print(f'{porcentagemMaximaPossivel:.2f}%')
-            
+        elif opcao == 3:
+            nome_disciplina = input("Digite o nome da disciplina: ")
+            disciplina = sistema.buscar_disciplina(nome_disciplina)
+            if disciplina:
+                while True:
+                    print(f"\n--- Gerenciamento da Disciplina {disciplina.nome} ---")
+                    print("1. Adicionar aluno")
+                    print("2. Listar alunos")
+                    print("3. Registrar faltas")
+                    print("4. Ver faltas de aluno")
+                    print("5. Ver porcentagem máxima de presença")
+                    print("6. Ver aulas restantes")
+                    print("7. Remover aluno")
+                    print("8. Voltar")
+                    
+                    sub_opcao = int(input("Escolha uma opção: "))
+                    
+                    if sub_opcao == 1:
+                        nome_aluno = input("Nome do aluno: ")
+                        cpf_aluno = input("Cpf do aluno: ")
+                        matricula = input("Matrícula: ")
+                        aluno = Aluno(nome_aluno, cpf_aluno, matricula) 
+                        disciplina.adicionar_aluno(aluno) #agregação de Aluno
+                    
+                    elif sub_opcao == 2:
+                        print("Alunos matriculados:", disciplina.listar_alunos())
+                    
+                    elif sub_opcao == 3:
+                        matricula = input("Matrícula do aluno: ")
+                        quantidade = int(input("Quantidade de faltas: "))
+                        for aluno in disciplina.alunos:
+                            if aluno.matricula == matricula:
+                                aluno.registrar_faltas(disciplina.nome, quantidade)
+                                break
+                        else:
+                            print("Aluno não encontrado.")
+                    
+                    elif sub_opcao == 4:
+                        matricula = input("Matrícula do aluno: ")
+                        faltas = disciplina.faltas_aluno(matricula)
+                        if faltas is not None:
+                            print(f"Faltas do aluno: {faltas}")
+                    
+                    elif sub_opcao == 5:
+                        matricula = input("Matrícula do aluno: ")
+                        porcentagem = sistema.porcentagem_presenca(disciplina, matricula)
+                        if porcentagem is not None:
+                            print(f"Porcentagem máxima de presença: {porcentagem:.2f}%")
+                    
+                    elif sub_opcao == 6:
+                        matricula = input("Matrícula do aluno: ")
+                        restantes = sistema.aulas_restantes(disciplina, matricula)
+                        if restantes is not None:
+                            print(f"Aulas que o aluno ainda pode faltar: {restantes:.2f}")
+                    
+                    elif sub_opcao == 7:
+                        matricula = input("Matrícula do aluno a ser removido: ")
+                        disciplina.remover_aluno(matricula)
+                    
+                    elif sub_opcao == 8:
+                        break
+                    else:
+                        print("Opção inválida.")
             else:
-                print('ERRO: Você deve digitar 1 ou 2')
-   
-            
-        if (opcao == 6):
-            opcaoMateria = input('Digite 1 para verificar POO e 2 para verificar FMI: \n')
-            
-            matricula = input('Digite a matrícula do aluno que você quer verificar: \n')
-            
-            aluno = SistemaGeralUFSC.acharMatricula(matricula)
-            
-            if (aluno == None):
-                print (f'Nenhum aluno foi encontrado com a matrícula {matricula}\n')
-            
-            elif (opcaoMateria == '1'):
-                numeroAulasFaltaveis = SistemaPOO.numeroAulasFaltaveis(numeroFaltasPOO)
-                print(numeroAulasFaltaveis)
-            
-            elif (opcaoMateria == '2'):
-                numeroAulasFaltaveis = SistemaFMI.numeroAulasFaltaveis(numeroFaltasFMI)
-                print(numeroAulasFaltaveis)
-            
-            else:
-                print('ERRO: Você deve digitar 1 ou 2')
-            
+                print("Disciplina não encontrada.")
         
-        if (opcao == 7):
+        elif opcao == 4:
+            nome = input("Digite o nome da disciplina a ser excluída: ")
+            sistema.excluir_disciplina(nome)
+        
+        elif opcao == 5:
+            nome_atual = input("Digite o nome atual da disciplina: ")
+            novo_nome = input("Digite o novo nome da disciplina: ")
+            sistema.alterar_nome_disciplina(nome_atual, novo_nome)
+        
+        elif opcao == 6:
+            print("Saindo...")
             break
-            
+        else:
+            print("Opção inválida.")
+    
     except ValueError:
-        print('Você deve digitar um número, não uma letra. Digite o numero 1, 2, 3, 4 ou 5')
+        print("Erro: entrada inválida.")
